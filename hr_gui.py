@@ -28,44 +28,6 @@ class NavigationToolbar(NavigationToolbar2Tk):
                  t[0] == 'Save']
 
 
-# def graph_stat(check, name, new_window):
-#     df = pd.read_csv('data.csv', encoding='utf-8')
-#     if check == 0:
-#         None
-#     elif check == 1:
-#         df = df[df['Name'] == name]
-#     elif check == 2:
-#         df = df[df['Department'] == name]
-#     df.sort_values("timelaps", inplace=True)
-#     df.drop_duplicates(subset="hash",
-#                        keep='last', inplace=True)
-#     metrics = [np.mean((df.q1 + df.q2) / 2), np.mean((df.q3 + df.q4 + df.q5 + df.q6) / 4),
-#                np.mean((df.q7 + df.q8 + df.q9 + df.q10) / 4), np.mean((df.q11 + df.q12) / 2)]
-#     rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
-#              'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
-#     colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
-#     fig = Figure(figsize=(16, 8))
-#     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
-#     ax.set_ylim(0, 10)
-#     ax.bar(rates, metrics, width=0.5, color=colors)
-#     ax.set_xlabel('Показатели')
-#     canvas = FigureCanvasTkAgg(fig, master=new_window)
-#     plt.show()
-#     canvas.draw()
-#     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=True)
-#     toolbar = NavigationToolbar(canvas, window=new_window)
-#     toolbar.update()
-#     canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
-#     # тянуть на сейв
-#     if check == 0:
-#         discription = ''
-#     elif check == 1:
-#         discription = name
-#     elif check == 2:
-#         discription = name
-#     metrics.append(discription)
-#     global df_to_save
-#     df_to_save = pd.DataFrame([metrics], columns=['st1', 'st2', 'st3', 'st4', 'discript'])
 def graph_stat():
     df = pd.read_csv('data.csv', encoding='utf-8')
     if graph_type == 0:
@@ -349,8 +311,6 @@ def comparison_bars():
     ax.set_ylim(0, 10)
     X = np.arange(4)
     width = 0.35
-    print(filename1[(filename1.rfind('/') + 1):-4], df1['discript'][0])
-    print(filename2[(filename2.rfind('/') + 1):-4], df2['discript'][0])
     ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
            label=filename1[(filename1.rfind('/') + 1):-4])  # +' ' +df1['discript'][0])
     ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,

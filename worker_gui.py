@@ -74,9 +74,7 @@ def get_departments():
     time.sleep(2)
 
     for i in range(MAX_CONNECTIONS):
-        print("begin")
         data = clients[i].recv(1024)
-        print("first step done")
         data = pickle.loads(data)
 
     return data
@@ -325,5 +323,3 @@ key = get_info("key")
 result.append(key)
 
 window.mainloop()
-
-print(result)
