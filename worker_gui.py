@@ -38,8 +38,8 @@ def get_info(name):
 
 
 good_width = 500
-server_ip = get_info("server_ip")
-address_to_server = ("192.168.1.50", 8686)
+server_ip = str(get_info("server_ip"))
+address_to_server = (server_ip, 8686)
 clients = []
 
 

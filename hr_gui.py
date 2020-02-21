@@ -16,29 +16,75 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
+
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
 
+class NavigationToolbar(NavigationToolbar2Tk):
+    # only display the buttons we need
+    toolitems = [t for t in NavigationToolbar2Tk.toolitems if
+                 t[0] == 'Save']
 
-def graph_stat(check, name, new_window):
-    df=pd.read_csv('data.csv', encoding='utf-8')
-    if check ==0 :
-        None
-    elif check == 1:
-        df=df[df['Name']==name]
-    elif check == 2:
-        df = df[df['Department'] == name]
-    df.sort_values("timelaps", inplace = True)
-    df.drop_duplicates(subset ="hash",
-                     keep = 'last', inplace = True)
-    metrics = [np.mean((df.q1+df.q2)/2),np.mean((df.q3+df.q4+df.q5+df.q6)/4),
-               np.mean((df.q7+df.q8+df.q9+df.q10)/4),np.mean((df.q11+df.q12)/2)]
-    rates= ['Понимание своих задач \n и обеспеченность ресурсами','Нематериальное \n признание',
-            'Ценность работы \n в данной команде','Конструктивная обратная связь \n и перспективы развития']
-    colors=['#005DFF','#FF0000','#00C11A','#D4DB00']
-    fig = Figure(figsize=(16, 8))
+
+# def graph_stat(check, name, new_window):
+#     df = pd.read_csv('data.csv', encoding='utf-8')
+#     if check == 0:
+#         None
+#     elif check == 1:
+#         df = df[df['Name'] == name]
+#     elif check == 2:
+#         df = df[df['Department'] == name]
+#     df.sort_values("timelaps", inplace=True)
+#     df.drop_duplicates(subset="hash",
+#                        keep='last', inplace=True)
+#     metrics = [np.mean((df.q1 + df.q2) / 2), np.mean((df.q3 + df.q4 + df.q5 + df.q6) / 4),
+#                np.mean((df.q7 + df.q8 + df.q9 + df.q10) / 4), np.mean((df.q11 + df.q12) / 2)]
+#     rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
+#              'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
+#     colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
+#     fig = Figure(figsize=(16, 8))
+#     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+#     ax.set_ylim(0, 10)
+#     ax.bar(rates, metrics, width=0.5, color=colors)
+#     ax.set_xlabel('Показатели')
+#     canvas = FigureCanvasTkAgg(fig, master=new_window)
+#     plt.show()
+#     canvas.draw()
+#     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=True)
+#     toolbar = NavigationToolbar(canvas, window=new_window)
+#     toolbar.update()
+#     canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
+#     # тянуть на сейв
+#     if check == 0:
+#         discription = ''
+#     elif check == 1:
+#         discription = name
+#     elif check == 2:
+#         discription = name
+#     metrics.append(discription)
+#     global df_to_save
+#     df_to_save = pd.DataFrame([metrics], columns=['st1', 'st2', 'st3', 'st4', 'discript'])
+def graph_stat():
+    df = pd.read_csv('data.csv', encoding='utf-8')
+    if graph_type == 0:
+        new_window = company_window
+    elif graph_type == 1:
+        df = df[df['Name'] == combobox.get()]
+        new_window = individual_window
+    elif graph_type == 2:
+        df = df[df['Department'] == combobox.get()]
+        new_window = departments_window
+    df.sort_values("timelaps", inplace=True)
+    df.drop_duplicates(subset="hash",
+                       keep='last', inplace=True)
+    metrics = [np.mean((df.q1 + df.q2) / 2), np.mean((df.q3 + df.q4 + df.q5 + df.q6) / 4),
+               np.mean((df.q7 + df.q8 + df.q9 + df.q10) / 4), np.mean((df.q11 + df.q12) / 2)]
+    rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
+             'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
+    colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
+    fig = Figure(figsize=(10, 4))
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.set_ylim(0, 10)
     ax.bar(rates, metrics, width=0.5, color=colors)
@@ -46,20 +92,23 @@ def graph_stat(check, name, new_window):
     canvas = FigureCanvasTkAgg(fig, master=new_window)
     plt.show()
     canvas.draw()
-    canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=True)
-    toolbar = NavigationToolbar2Tk(canvas, window=new_window)
+    canvas.get_tk_widget().place(x=0, y=900)
+    toolbar = NavigationToolbar(canvas, window=new_window)
     toolbar.update()
-    canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
-    #тянуть на сейв
-    if check == 0:
-        discription = ''
-    elif check == 1:
-        discription = name
-    elif check == 2:
-        discription = name
-    metrics.append(discription)
+    canvas._tkcanvas.place(x=5, y=100)
+    # тянуть на сейв
+    if graph_type == 0:
+        description = ''
+    elif graph_type == 1:
+        description = combobox.get()
+    elif graph_type == 2:
+        description = combobox.get()
+    else:
+        description = ''
+    metrics.append(description)
     global df_to_save
     df_to_save = pd.DataFrame([metrics], columns=['st1', 'st2', 'st3', 'st4', 'discript'])
+
 
 path_to_departments = "log/departments.txt"
 departments = []
@@ -108,12 +157,15 @@ def get_departments():
         else:
             i += 1
 
+
 def get_names():
     df = pd.read_csv('data.csv', encoding='utf-8')
     df.drop_duplicates(subset="hash",
                        keep='last', inplace=True)
-    names=list(df.Name.values)
+    names = list(df.Name.values)
     return names
+
+
 def weight_calculate():
     max = 0
     for department in departments:
@@ -209,72 +261,100 @@ def add_department():
 
 
 def by_company_screen():
+    global graph_type, company_window
+    graph_type = 0
     company_window = Tk()
     company_window.title("По всей компании")
-    company_window.geometry("900x600")
+    company_window.geometry("1000x600")
     company_window.wm_geometry("+%d+%d" % (x, y))
-    graph_stat(0, 'name', company_window)
+    graph_stat()
     save_butt = Button(company_window, text="Сохранить срез", command=save_departs_csv)
-    save_butt.pack(side=TOP, expand=True)
+    save_butt.place(x=25, y=35)
+
+
 def by_departments_screen():
+    global graph_type, departments_window, combobox
+    graph_type = 2
     departments_window = Tk()
     departments_window.title("По отделам")
-    departments_window.geometry("900x600")
+    departments_window.geometry("1000x600")
     departments_window.wm_geometry("+%d+%d" % (x, y))
     get_departments()
-    combobox = ttk.Combobox(departments_window, values=departments, height=4)
-    combobox.pack(side=TOP, fill=X, expand=True)
-    combobox.bind('<<ComboboxSelected>>', lambda event: graph_stat(2, combobox.get(), departments_window))
+    combobox = ttk.Combobox(departments_window, values=departments, height=4, width=40)
+    combobox.place(x=25, y=50)
     save_butt = Button(departments_window, text="Сохранить срез", command=save_departs_csv)
-    save_butt.pack(side=TOP, expand=True)
+    save_butt.place(x=300, y=47)
+    paint_butt = Button(departments_window, text="Построить график", command=graph_stat)
+    paint_butt.place(x=410, y=47)
+
 
 def save_departs_csv():
-    filename = filedialog.asksaveasfilename( initialdir=" ",title="Введите название среза",
-                                                               filetypes=(
-                                                               ("csv files", "*.csv"), ("csv files", "*.csv")))
+    filename = filedialog.asksaveasfilename(initialdir=" ", title="Введите название среза",
+                                            filetypes=(
+                                                ("csv files", "*.csv"), ("csv files", "*.csv")))
     df_to_save.to_csv(filename + '.csv')
+
+
 def by_individual_screen():
+    global graph_type, combobox, individual_window
+    graph_type = 1
     individual_window = Tk()
     individual_window.title("Индивидуально")
-    individual_window.geometry("900x600")
+    individual_window.geometry("1000x600")
     individual_window.wm_geometry("+%d+%d" % (x, y))
-    names=get_names()
-    combobox = ttk.Combobox(individual_window, values=names)
-    combobox.pack(side=TOP, fill=X, expand=True)
-    combobox.bind('<<ComboboxSelected>>', lambda event: graph_stat(1, combobox.get(), individual_window))
+    names = get_names()
+    combobox = ttk.Combobox(individual_window, values=names, width=40)
+    combobox.place(x=25, y=50)
+    # combobox.bind('<<ComboboxSelected>>', lambda event: graph_stat(1, combobox.get(), individual_window))
     save_butt = Button(individual_window, text="Сохранить срез", command=save_departs_csv)
-    save_butt.pack(side=TOP, expand=True)
+    save_butt.place(x=300, y=47)
+    paint_butt = Button(individual_window, text="Построить график", command=graph_stat)
+    paint_butt.place(x=410, y=47)
 
 
 def download_first_departs_csv():
     global filename1
-    filename1 = filedialog.askopenfilename(initialdir = " ",
-                                             title = "Выберите первый срез",
-                                             filetypes = (("csv files","*.csv"),
-                                                          ("csv files","*.csv")))
+    filename1 = filedialog.askopenfilename(initialdir=" ",
+                                           title="Выберите первый срез",
+                                           filetypes=(("csv files", "*.csv"),
+                                                      ("csv files", "*.csv")))
+
+
 def download_second_departs_csv():
     global filename2
-    filename2 = filedialog.askopenfilename(initialdir = " ",
-                                             title = "Выберите второй срез",
-                                             filetypes = (("csv files","*.csv"),
-                                                          ("csv files","*.csv")))
+    filename2 = filedialog.askopenfilename(initialdir=" ",
+                                           title="Выберите второй срез",
+                                           filetypes=(("csv files", "*.csv"),
+                                                      ("csv files", "*.csv")))
+
 
 def comparison_bars():
-    df1=pd.read_csv(filename1)
-    df2=pd.read_csv(filename2)
-    rates= ['Понимание своих задач \n и обеспеченность ресурсами','Нематериальное \n признание',
-            'Ценность работы \n в данной команде','Конструктивная обратная связь \n и перспективы развития']
-    colors=['#005DFF','#FF0000','#00C11A','#D4DB00']
-    colors1=['#D4DB00','#00C11A','#FF0000','#005DFF']
-    fig = Figure(figsize=(16,8))
-    ax = fig.add_axes([0,0,1,1])
+    try:
+        df1 = pd.read_csv(filename1)
+    except NameError:
+        mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
+        return 0
+    try:
+        df2 = pd.read_csv(filename2)
+    except NameError:
+        mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
+        return 0
+
+    rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
+             'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
+    colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
+    colors1 = ['#D4DB00', '#00C11A', '#FF0000', '#005DFF']
+    fig = Figure(figsize=(16, 8))
+    ax = fig.add_axes([0, 0, 1, 1])
     ax.set_ylim(0, 10)
     X = np.arange(4)
-    width=0.35
-    print(filename1[(filename1.rfind('/')+1):-4],df1['discript'][0])
-    print(filename2[(filename2.rfind('/')+1):-4],df2['discript'][0])
-    ax.bar(X-width/2,df1[['st1','st2','st3','st4']].values.tolist()[0],width,label=filename1[(filename1.rfind('/')+1):-4])#+' ' +df1['discript'][0])
-    ax.bar(X+width/2,df2[['st1','st2','st3','st4']].values.tolist()[0],width,label=filename2[(filename2.rfind('/')+1):-4])#+' ' +df2['discript'][0])
+    width = 0.35
+    print(filename1[(filename1.rfind('/') + 1):-4], df1['discript'][0])
+    print(filename2[(filename2.rfind('/') + 1):-4], df2['discript'][0])
+    ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
+           label=filename1[(filename1.rfind('/') + 1):-4])  # +' ' +df1['discript'][0])
+    ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
+           label=filename2[(filename2.rfind('/') + 1):-4])  # +' ' +df2['discript'][0])
     ax.set_xticks(X)
     ax.set_xticklabels(rates)
     ax.set_ylim(0, 10)
@@ -291,11 +371,16 @@ def comparison_bars():
     toolbar = NavigationToolbar2Tk(canvas, window=co_window)
     toolbar.update()
     canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
+
+
 def comparison_screen():
+    global cmp_window_is_open
+    cmp_window_is_open = True
     comparison_window = Tk()
     comparison_window.title("Сравнение")
     comparison_window.geometry("300x300")
     comparison_window.wm_geometry("+%d+%d" % (x, y))
+    window.wm_geometry("+%d+%d" % (10000, 10000))
     first_butt = Button(comparison_window, text="Выберите первый срез", command=download_first_departs_csv)
     first_butt.place(x=10, y=85)
     second_butt = Button(comparison_window, text="Выберите второй срез", command=download_second_departs_csv)
@@ -304,10 +389,8 @@ def comparison_screen():
     comparison_butt.place(x=100, y=120)
 
 
-
-
 def config_statistic_screen():
-    global by_company, by_departments, by_individual, back
+    global by_company, by_departments, by_individual, back, comparison
 
     objects = [departments_button, statistic_button, quit_button]
     for object_name in objects:
@@ -380,8 +463,8 @@ def config_departments_screen():
 
 def config_main_screen():
     global statistic_button, departments_button, quit_button, add, delete, back, by_individual, by_departments, \
-        by_company
-    objects = [add, delete, back, by_individual, by_departments, by_company]
+        by_company, comparison
+    objects = [add, delete, back, by_individual, by_departments, by_company, comparison]
     for object_name in objects:
         object_name.destroy()
     for i in range(len(departments)):
@@ -404,6 +487,12 @@ add = Button(window, text="Добавить отдел")
 delete = Button(window, text="Удалить выбранные отделы")
 chk_states = []
 departments_count = 0
+cmp_window_is_open = False
+graph_type = None
+combobox = None
+individual_window = None
+company_window = None
+departments_window = None
 
 statistic_button = Button(window, text="Просмотреть статистику", command=config_statistic_screen)
 statistic_button.place(x=125, y=50)
@@ -416,6 +505,7 @@ add = Button(window, text="Добавить отдел", command=add_department)
 delete = Button(window, text="Удалить выбранные отделы", command=delete_department)
 back = Button(window, text="Вернуться в меню", command=config_main_screen)
 departments_state = [Checkbutton(window) for i in range(len(departments))]
+comparison = Button()
 enter = Text(window)
 by_departments = Button(window)
 by_company = Button(window)
