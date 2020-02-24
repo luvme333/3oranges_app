@@ -275,7 +275,7 @@ for i in range(1, 21):
 generate_key()
 # общие настройки окна
 window = Tk()
-window.title("Hello World")
+window.title("Gallup опрос")
 window.geometry('400x275')
 window.resizable(False, False)
 x = (window.winfo_screenmmwidth() - window.winfo_reqwidth()) / 2
@@ -286,8 +286,8 @@ next_btn = Button(window, text="Следующий вопрос", command=next_q
 scale = Scale(window, orient=HORIZONTAL, length=300, from_=0, to=10)
 answer = Label(window, text="")
 
-departments = get_departments()
-
+#departments = get_departments()
+departments=['1','2','3','4']
 # первый экран
 name_request = Label(window, text='Введите Ваше имя и фамилию:')
 name_request.place(x=45, y=35)

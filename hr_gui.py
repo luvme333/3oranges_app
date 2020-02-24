@@ -28,7 +28,13 @@ class NavigationToolbar(NavigationToolbar2Tk):
                  t[0] == 'Save']
 
 
+
+
+
+
+
 def graph_stat():
+
     df = pd.read_csv('data.csv', encoding='utf-8')
     if graph_type == 0:
         new_window = company_window
@@ -38,35 +44,57 @@ def graph_stat():
     elif graph_type == 2:
         df = df[df['Department'] == combobox.get()]
         new_window = departments_window
+
+    if len(new_window.winfo_children()) > 4 :
+        new_window.winfo_children()[-1].destroy()
+
     df.sort_values("timelaps", inplace=True)
     df.drop_duplicates(subset="hash",
                        keep='last', inplace=True)
+    df.reset_index(inplace=True)
+    df.drop(['index'], 1, inplace=True)
+
     metrics = [np.mean((df.q1 + df.q2) / 2), np.mean((df.q3 + df.q4 + df.q5 + df.q6) / 4),
                np.mean((df.q7 + df.q8 + df.q9 + df.q10) / 4), np.mean((df.q11 + df.q12) / 2)]
+    index=np.round(np.mean(metrics),1)
+    if graph_type == 0:
+        title='Компания' +'\n' + 'Индекс вовлеченности ' + str(index)
+        description = ''
+    elif graph_type == 1:
+        title=combobox.get() + ', ' + (df['Department'][0]) +', ' + df['experience'][0] +'\n' + 'Индекс вовлеченности ' + str(index)
+        description = df['Department'][0] +', ' + df['experience'][0]
+    elif graph_type == 2:
+        title=combobox.get() +'\n' + 'Индекс вовлеченности ' + str(index)
+        description = ''
+    else:
+        description = 'gg'
     rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
              'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
     colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
-    fig = Figure(figsize=(10, 4))
+    fig = Figure(figsize=(12,6))
+    fig.suptitle(title)
     ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.set_ylim(0, 10)
-    ax.bar(rates, metrics, width=0.5, color=colors)
+    for rect in ax.bar(rates, metrics, width=0.5, color=colors):
+        height = np.round(rect.get_height(),1)
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
     ax.set_xlabel('Показатели')
+    ax.set_ylabel('Оценка')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
     canvas = FigureCanvasTkAgg(fig, master=new_window)
-    plt.show()
     canvas.draw()
     canvas.get_tk_widget().place(x=0, y=900)
+
     toolbar = NavigationToolbar(canvas, window=new_window)
     toolbar.update()
     canvas._tkcanvas.place(x=5, y=100)
     # тянуть на сейв
-    if graph_type == 0:
-        description = ''
-    elif graph_type == 1:
-        description = combobox.get()
-    elif graph_type == 2:
-        description = combobox.get()
-    else:
-        description = ''
+
     metrics.append(description)
     global df_to_save
     df_to_save = pd.DataFrame([metrics], columns=['st1', 'st2', 'st3', 'st4', 'discript'])
@@ -77,7 +105,7 @@ departments = []
 departments_state = []
 
 window = Tk()
-window.title("Hello World")
+window.title("HR клиент")
 window.geometry('400x250')
 window.resizable(False, False)
 x = (window.winfo_screenmmwidth() - window.winfo_reqwidth()) / 2
@@ -273,7 +301,6 @@ def by_individual_screen():
     paint_butt = Button(individual_window, text="Построить график", command=graph_stat)
     paint_butt.place(x=410, y=47)
 
-
 def download_first_departs_csv():
     global filename1
     filename1 = filedialog.askopenfilename(initialdir=" ",
@@ -306,29 +333,46 @@ def comparison_bars():
              'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
     colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
     colors1 = ['#D4DB00', '#00C11A', '#FF0000', '#005DFF']
-    fig = Figure(figsize=(16, 8))
-    ax = fig.add_axes([0, 0, 1, 1])
+    fig = Figure(figsize=(10,4))
+    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.set_ylim(0, 10)
     X = np.arange(4)
     width = 0.35
-    ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=filename1[(filename1.rfind('/') + 1):-4])  # +' ' +df1['discript'][0])
-    ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=filename2[(filename2.rfind('/') + 1):-4])  # +' ' +df2['discript'][0])
+    index1=np.round(np.mean(df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]),1)
+    index2 = np.round(np.mean(df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]), 1)
+    for rect in (ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
+           label=(filename1[(filename1.rfind('/') + 1):-4]   +' ' +df1['discript'][0] +'\n'+ 'Индекс вовлеченности - '+ str(index1)))):
+        height = np.round(rect.get_height(),1)
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
+
+    for rect in (ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
+           label=(filename2[(filename2.rfind('/') + 1):-4]  +' ' +df2['discript'][0]+'\n'+ 'Индекс вовлеченности - '+ str(index2)))):
+        height = np.round(rect.get_height(),1)
+        ax.annotate('{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom')
     ax.set_xticks(X)
     ax.set_xticklabels(rates)
-    ax.set_ylim(0, 10)
     ax.set_xlabel('Показатели')
-    ax.legend()
+    ax.set_ylabel('Оценка')
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
     co_window = Tk()
     co_window.title("Cравнение")
-    co_window.geometry("900x600")
-    co_window.wm_geometry("+%d+%d" % (x, y))
+    co_window.geometry("1000x600")
+    #co_window.wm_geometry("+%d+%d" % (x, y))
     canvas = FigureCanvasTkAgg(fig, master=co_window)
     plt.show()
     canvas.draw()
     canvas.get_tk_widget().pack(side=TOP, fill=BOTH, expand=True)
-    toolbar = NavigationToolbar2Tk(canvas, window=co_window)
+    toolbar = NavigationToolbar(canvas, window=co_window)
     toolbar.update()
     canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
 
