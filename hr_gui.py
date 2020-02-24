@@ -377,14 +377,21 @@ def comparison_bars():
     canvas._tkcanvas.pack(side=TOP, fill=BOTH, expand=True)
 
 
+def on_closing_comparison_window():
+    comparison_window.destroy()
+    window.wm_state('normal')
+
+
 def comparison_screen():
-    global cmp_window_is_open
+    global cmp_window_is_open, comparison_window
     cmp_window_is_open = True
     comparison_window = Tk()
+    comparison_window.protocol("WM_DELETE_WINDOW", on_closing_comparison_window)
     comparison_window.title("Сравнение")
     comparison_window.geometry("300x300")
     comparison_window.wm_geometry("+%d+%d" % (x, y))
-    window.wm_geometry("+%d+%d" % (10000, 10000))
+    comparison_window.focus_force()
+    window.wm_state('iconic')
     first_butt = Button(comparison_window, text="Выберите первый срез", command=download_first_departs_csv)
     first_butt.place(x=10, y=85)
     second_butt = Button(comparison_window, text="Выберите второй срез", command=download_second_departs_csv)
@@ -497,6 +504,7 @@ combobox = None
 individual_window = None
 company_window = None
 departments_window = None
+comparison_window = None
 
 statistic_button = Button(window, text="Просмотреть статистику", command=config_statistic_screen)
 statistic_button.place(x=125, y=50)

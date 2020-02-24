@@ -32,7 +32,7 @@ def get_info(name):
 
     for i in range(len(lines)):
         if name in lines[i]:
-            info = lines[i][len(name)+1:len(lines[i])]
+            info = lines[i][len(name) + 1:len(lines[i])]
     file.close()
     return info
 
@@ -46,17 +46,20 @@ clients = []
 def generate_key():
     if not os.path.exists("log"):
         os.mkdir("log")
-    if os.path.exists(config_path):
-        with open(config_path, 'r', encoding='utf-8') as file:
-            lines = file.read().splitlines()
-        for i in range(len(lines)):
-            if "key" in lines[i]:
-                return 1
     mac = hex(get_mac()).replace('0x', '')
     sha = hashlib.sha1(mac.encode('utf-8')).hexdigest()
+    if sha == get_info('key'):
+        return True
+    elif get_info('key') is not None and sha != get_info('key'):
+        mb.showerror('Ошибка', 'Похоже, что Вы пользуетесь не своим экземпляром программы. Просьба обратиться к HR '
+                               'или системному администратору для переустановки программы.')
+        window.quit()
+        return False
+
     file = open(config_path, "a", encoding='utf-8')
     file.write('\n' + "key:" + sha)
     file.close()
+    return True
 
 
 def set_good_width(width):
@@ -113,13 +116,22 @@ def start_btn_clicked():
     global question_number
     global experience
     department = str(department_select.get())
-    if anon_state.get() or name_enter.get() == '':
+    if not anon_state.get() and name_enter.get() == '':
+        mb.showerror('Ошибка', 'Введите имя или выберите "Анонимно".')
+        return -1
+
+    if anon_state.get():
         name = "Анонимно"
     else:
         name = name_enter.get()
     age = experience_age.get()
     month = experience_month.get()
     experience = age + " " + month
+    message = 'Подтвердите введенные Вами данные:' + '\n' + 'Имя: ' + name + '\n' + 'Отдел: ' + department + '\n' + \
+              'Ваш стаж: ' + experience
+    answer = mb.askyesno('Подтверждение', message)
+    if not answer:
+        return -1
     result.append(name)
     result.append(str(department))
     result.append(experience)
@@ -264,17 +276,17 @@ answers = [["Совсем не знаю", "Сомневаюсь", "Точно з
            ["Совсем не было", "Сомневаюсь", "Точно была"]]
 
 for i in range(1, 21):
-    if i%10 == 1 and i != 11:
+    if i % 10 == 1 and i != 11:
         age_list.append(str(i) + " год")
         continue
-    if (i%10 == 2 or i%10 == 3 or i%10 == 4) and (i != 12 and i != 13 and i != 14):
+    if (i % 10 == 2 or i % 10 == 3 or i % 10 == 4) and (i != 12 and i != 13 and i != 14):
         age_list.append(str(i) + " года")
         continue
     age_list.append(str(i) + ' лет')
 
-generate_key()
 # общие настройки окна
 window = Tk()
+
 window.title("Gallup опрос")
 window.geometry('400x275')
 window.resizable(False, False)
@@ -286,8 +298,8 @@ next_btn = Button(window, text="Следующий вопрос", command=next_q
 scale = Scale(window, orient=HORIZONTAL, length=300, from_=0, to=10)
 answer = Label(window, text="")
 
-#departments = get_departments()
-departments=['1','2','3','4']
+# departments = get_departments()
+departments = ['1', '2', '3', '4']
 # первый экран
 name_request = Label(window, text='Введите Ваше имя и фамилию:')
 name_request.place(x=45, y=35)
@@ -322,4 +334,5 @@ quit_button.place(x=100, y=225)
 key = get_info("key")
 result.append(key)
 
-window.mainloop()
+if generate_key():
+    window.mainloop()
