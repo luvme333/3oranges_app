@@ -301,20 +301,39 @@ def by_individual_screen():
     paint_butt = Button(individual_window, text="Построить график", command=graph_stat)
     paint_butt.place(x=410, y=47)
 
+
 def download_first_departs_csv():
-    global filename1
+    global filename1, first_butt
     filename1 = filedialog.askopenfilename(initialdir=" ",
                                            title="Выберите первый срез",
                                            filetypes=(("csv files", "*.csv"),
                                                       ("csv files", "*.csv")))
+    if not filename1:
+        return -1
+    first_butt.configure(text=search_filename(filename1))
+    first_file = Label(comparison_window, text='Первый срез выбран:')
+    first_file.place(x=10, y=85)
 
 
 def download_second_departs_csv():
-    global filename2
+    global filename2, second_butt
     filename2 = filedialog.askopenfilename(initialdir=" ",
                                            title="Выберите второй срез",
                                            filetypes=(("csv files", "*.csv"),
                                                       ("csv files", "*.csv")))
+    if not filename2:
+        return -1
+    second_butt.configure(text=search_filename(filename2))
+    second_file = Label(comparison_window, text='Второй срез выбран:')
+    second_file.place(x=155, y=85)
+
+
+def search_filename(filename):
+    for i in range(len(filename)-1, 0, -1):
+        if filename[i] == '/':
+            index = i + 1
+            break
+    return filename[index:]
 
 
 def comparison_bars():
@@ -383,7 +402,7 @@ def on_closing_comparison_window():
 
 
 def comparison_screen():
-    global cmp_window_is_open, comparison_window
+    global cmp_window_is_open, comparison_window, first_butt, second_butt
     cmp_window_is_open = True
     comparison_window = Tk()
     comparison_window.protocol("WM_DELETE_WINDOW", on_closing_comparison_window)
@@ -393,11 +412,11 @@ def comparison_screen():
     comparison_window.focus_force()
     window.wm_state('iconic')
     first_butt = Button(comparison_window, text="Выберите первый срез", command=download_first_departs_csv)
-    first_butt.place(x=10, y=85)
+    first_butt.place(x=10, y=110)
     second_butt = Button(comparison_window, text="Выберите второй срез", command=download_second_departs_csv)
-    second_butt.place(x=155, y=85)
+    second_butt.place(x=155, y=110)
     comparison_butt = Button(comparison_window, text="Сравнить", command=comparison_bars)
-    comparison_butt.place(x=100, y=120)
+    comparison_butt.place(x=100, y=150)
 
 
 def config_statistic_screen():
@@ -505,6 +524,8 @@ individual_window = None
 company_window = None
 departments_window = None
 comparison_window = None
+first_butt = None
+second_butt = None
 
 statistic_button = Button(window, text="Просмотреть статистику", command=config_statistic_screen)
 statistic_button.place(x=125, y=50)
