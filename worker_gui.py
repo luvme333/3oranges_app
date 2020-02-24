@@ -11,6 +11,7 @@ import socket
 import hashlib
 from uuid import getnode as get_mac
 import os.path
+import subprocess
 
 config_path = "log/config.bin"
 
@@ -23,6 +24,20 @@ class Scale(ttk.Scale):
     def set_value(self, event):
         self.event_generate('<Button-3>', x=event.x, y=event.y)
         return 'break'
+
+
+def set_invisible():
+    is_invisible = get_info("visible")
+    if is_invisible == "False":
+        with open(config_path, "r", encoding='utf-8') as file:
+            lines = file.readlines()
+        for line in lines:
+            if line.find("visible") != -1:
+                lines[lines.index(line)] = "visible:True"
+        print(lines)
+        with open(config_path, "w", encoding='utf-8') as file:
+            file.writelines(lines)
+        subprocess.call(['attrib', '+h', config_path])
 
 
 def get_info(name):
@@ -46,14 +61,14 @@ clients = []
 def generate_key():
     if not os.path.exists("log"):
         os.mkdir("log")
+    mac = hex(get_mac()).replace('0x', '')
+    sha = hashlib.sha1(mac.encode('utf-8')).hexdigest()
     if os.path.exists(config_path):
         with open(config_path, 'r', encoding='utf-8') as file:
             lines = file.read().splitlines()
         for i in range(len(lines)):
             if "key" in lines[i]:
                 return 1
-    mac = hex(get_mac()).replace('0x', '')
-    sha = hashlib.sha1(mac.encode('utf-8')).hexdigest()
     file = open(config_path, "a", encoding='utf-8')
     file.write('\n' + "key:" + sha)
     file.close()
@@ -286,7 +301,7 @@ next_btn = Button(window, text="Следующий вопрос", command=next_q
 scale = Scale(window, orient=HORIZONTAL, length=300, from_=0, to=10)
 answer = Label(window, text="")
 
-departments = get_departments()
+#departments = get_departments()
 
 # первый экран
 name_request = Label(window, text='Введите Ваше имя и фамилию:')
@@ -321,5 +336,6 @@ quit_button.place(x=100, y=225)
 
 key = get_info("key")
 result.append(key)
+set_invisible()
 
 window.mainloop()
