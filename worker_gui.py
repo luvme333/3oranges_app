@@ -77,7 +77,7 @@ def get_departments():
     time.sleep(2)
 
     for i in range(MAX_CONNECTIONS):
-        data = clients[i].recv(1024)
+        data = clients[i].recv(4096)
         data = pickle.loads(data)
 
     return data
@@ -125,8 +125,7 @@ def start_btn_clicked():
     else:
         name = name_enter.get()
     age = experience_age.get()
-    month = experience_month.get()
-    experience = age + " " + month
+    experience = age
     message = 'Подтвердите введенные Вами данные:' + '\n' + 'Имя: ' + name + '\n' + 'Отдел: ' + department + '\n' + \
               'Ваш стаж: ' + experience
     answer = mb.askyesno('Подтверждение', message)
@@ -136,8 +135,7 @@ def start_btn_clicked():
     result.append(str(department))
     result.append(experience)
 
-    objects = [name_request, name_enter, anon_flag, start_btn, quit_button, department_select, department_request,
-               experience_month, experience_age, experience_label]
+    objects = [name_request, name_enter, anon_flag, start_btn, quit_button, department_select, department_request, experience_age, experience_label]
     for object_name in objects:
         object_name.destroy()
 
@@ -228,7 +226,6 @@ def final_action():
 
     current_time = str(int(time.time()))
     result.append(current_time)
-
     send_data(result)
 
     done = Label(window, text="Благодарим за прохождение опроса!")
@@ -245,10 +242,8 @@ name = "Анонимно"
 department = -1
 question_number = 0
 departments = [1, 2, 3]
-age_list = ["0 лет"]
 experience = ''
-month_list = ["1 месяц", "2 месяца", "3 месяца", "4 месяца", "5 месяцев", "6 месяцев", "7 месяцев", "8 месяцев",
-              "9 месяцев", "10 месяцев", "11 месяцев"]
+
 questions = ["Знаете ли вы, каких именно результатов от вас ожидают на работе?",
              "Есть ли у вас все материалы и оборудование, необходимые для качественного выполнения работы?",
              "Имеете ли вы возможность каждый день на рабочем месте заниматься тем, что у вас получается лучше всего?",
@@ -275,15 +270,7 @@ answers = [["Совсем не знаю", "Сомневаюсь", "Точно з
            ["Точно не обсуждал", "Затрудняюсь ответить", "Точно обсуждал"],
            ["Совсем не было", "Сомневаюсь", "Точно была"]]
 
-for i in range(1, 21):
-    if i % 10 == 1 and i != 11:
-        age_list.append(str(i) + " год")
-        continue
-    if (i % 10 == 2 or i % 10 == 3 or i % 10 == 4) and (i != 12 and i != 13 and i != 14):
-        age_list.append(str(i) + " года")
-        continue
-    age_list.append(str(i) + ' лет')
-
+age_list=['0 - 6 месяцев', '6 - 12 месяцев', '1 - 5 лет', '5 - 10 лет', '10 - 15 лет', 'больше  15 лет']
 # общие настройки окна
 window = Tk()
 
@@ -315,14 +302,10 @@ department_select.current(0)
 department_select.place(x=45, y=110)
 experience_label = Label(window, text="Введите Ваш стаж работы:")
 experience_label.place(x=45, y=135)
-experience_age = Combobox(window, width=20)
+experience_age = Combobox(window, width=47)
 experience_age['values'] = age_list
 experience_age.current(0)
 experience_age.place(x=45, y=160)
-experience_month = Combobox(window, width=20)
-experience_month['values'] = month_list
-experience_month.current(0)
-experience_month.place(x=205, y=160)
 anon_state = BooleanVar()
 anon_state.set(False)
 anon_flag = Checkbutton(window, text='Пройти опрос анонимно', variable=anon_state,
