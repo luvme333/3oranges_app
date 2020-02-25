@@ -179,9 +179,15 @@ def config_question_screen(question_number):
         next_btn = Button(window, text="Следующий вопрос", command=next_question)
     scale = Scale(window, orient=HORIZONTAL, length=w - 75, from_=0, to=10, command=accept_whole_number_only)
     scale.place(x=25, y=85)
-
+    window.protocol("WM_DELETE_WINDOW", on_closing_test)
     place_digits_under_scale(w - 75)
     next_btn.place(x=w / 2 - 50, y=190)
+
+
+def on_closing_test():
+    answer = mb.askyesno('Выход', 'Вы не закончили тест. Если вы выйдете сейчас, результаты будут утеряны. Все равно выйти?')
+    if answer:
+        window.quit()
 
 
 def accept_whole_number_only(self, e=None):
@@ -277,8 +283,11 @@ window = Tk()
 window.title("Gallup опрос")
 window.geometry('400x275')
 window.resizable(False, False)
-x = (window.winfo_screenmmwidth() - window.winfo_reqwidth()) / 2
-y = (window.winfo_screenheight() - window.winfo_reqheight()) / 2
+w, h, x, y = map(int, re.split('x|\+', window.winfo_geometry()))
+sw = (window.winfo_rootx() - x) * 2 + w
+sh = (window.winfo_rooty() - y) + (window.winfo_rootx() - x) + h
+x = (window.winfo_screenwidth() - sw) // 2
+y = (window.winfo_screenheight() - sh) // 2
 window.wm_geometry("+%d+%d" % (x, y))
 question = Label(window, text=questions[question_number])
 next_btn = Button(window, text="Следующий вопрос", command=next_question)

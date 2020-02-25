@@ -113,8 +113,12 @@ window = Tk()
 window.title("HR клиент")
 window.geometry('400x250')
 window.resizable(False, False)
-x = (window.winfo_screenmmwidth() - window.winfo_reqwidth()) / 2
-y = (window.winfo_screenheight() - window.winfo_reqheight()) / 2
+w, h, x, y = map(int, re.split('x|\+', window.winfo_geometry()))
+sw = (window.winfo_rootx() - x) * 2 + w
+sh = (window.winfo_rooty() - y) + (window.winfo_rootx() - x) + h
+x = (window.winfo_screenwidth() - sw) // 2
+y = (window.winfo_screenheight() - sh) // 2
+
 window.wm_geometry("+%d+%d" % (x, y))
 
 
@@ -266,8 +270,8 @@ def by_company_screen():
     graph_type = 0
     company_window = Tk()
     company_window.title("По всей компании")
-    company_window.geometry("1000x600")
-    company_window.wm_geometry("+%d+%d" % (x, y))
+    company_window.geometry("1200x800")
+    company_window.wm_geometry("+%d+%d" % (x-250, y-250))
     graph_stat()
     save_butt = Button(company_window, text="Сохранить срез", command=save_departs_csv)
     save_butt.place(x=25, y=35)
@@ -278,8 +282,8 @@ def by_departments_screen():
     graph_type = 2
     departments_window = Tk()
     departments_window.title("По отделам")
-    departments_window.geometry("1000x600")
-    departments_window.wm_geometry("+%d+%d" % (x, y))
+    departments_window.geometry("1200x800")
+    departments_window.wm_geometry("+%d+%d" % (x-250, y-250))
     get_departments()
     combobox = ttk.Combobox(departments_window, values=departments, height=4, width=40)
     combobox.place(x=25, y=50)
@@ -301,8 +305,8 @@ def by_individual_screen():
     graph_type = 1
     individual_window = Tk()
     individual_window.title("Индивидуально")
-    individual_window.geometry("1000x600")
-    individual_window.wm_geometry("+%d+%d" % (x, y))
+    individual_window.geometry("1200x800")
+    individual_window.wm_geometry("+%d+%d" % (x-250, y-250))
     names = get_names()
     combobox = ttk.Combobox(individual_window, values=names, width=40)
     combobox.place(x=25, y=50)
@@ -318,12 +322,11 @@ def by_experience_screen():
     graph_type = 3
     experience_window = Tk()
     experience_window.title("По стажу")
-    experience_window.geometry("1000x600")
-    experience_window.wm_geometry("+%d+%d" % (x, y))
+    experience_window.geometry("1200x800")
+    experience_window.wm_geometry("+%d+%d" % (x-250, y-250))
     experience = get_experience()
     combobox = ttk.Combobox(experience_window, values=experience, width=40)
     combobox.place(x=25, y=50)
-    # combobox.bind('<<ComboboxSelected>>', lambda event: graph_stat(1, combobox.get(), individual_window))
     save_butt = Button(experience_window, text="Сохранить срез", command=save_departs_csv)
     save_butt.place(x=300, y=47)
     paint_butt = Button(experience_window, text="Построить график", command=graph_stat)
@@ -334,8 +337,10 @@ def download_screen():
     download_window=Tk()
     download_window.title("Сравнение")
     download_window.geometry("300x300")
-    download_window.wm_geometry("+%d+%d" % (x, y))
+    download_window.wm_geometry("+%d+%d" % (x-50, y-50))
     download_window.focus_force()
+    window.wm_state('iconic')
+    download_window.protocol("WM_DELETE_WINDOW", on_closing_download_window)
     just_1butt = Button(download_window, text="Выберите срез", command=download__csv)
     just_2butt = Button(download_window, text="Загрузить", command=old_bars)
     just_1butt.place(x=100, y=120)
@@ -379,12 +384,13 @@ def download__csv():
     third_file = Label(download_window, text='Cрез выбран:')
     third_file.place(x=100, y=85)
 
+
 def search_filename(filename):
     for i in range(len(filename)-1, 0, -1):
         if filename[i] == '/':
             index = i + 1
             break
-    return filename[index:]
+    return filename[index:-4]
 
 
 def comparison_bars():
@@ -411,7 +417,7 @@ def comparison_bars():
     index1=np.round(np.mean(df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]),1)
     index2 = np.round(np.mean(df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]), 1)
     for rect in (ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=(filename1[(filename1.rfind('/') + 1):-4]   +' ' +df1['discript'][0] +'\n'+ 'Индекс вовлеченности - '+ str(index1)))):
+           label=(search_filename(filename1)   +' ' + str(df1['discript'][0]) +'\n'+ 'Индекс вовлеченности - '+ str(index1)))):
         height = np.round(rect.get_height(),1)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
@@ -420,7 +426,7 @@ def comparison_bars():
                     ha='center', va='bottom')
 
     for rect in (ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=(filename2[(filename2.rfind('/') + 1):-4]  +' ' +df2['discript'][0]+'\n'+ 'Индекс вовлеченности - '+ str(index2)))):
+           label=(search_filename(filename2) + ' ' + str(df2['discript'][0]) +'\n' + 'Индекс вовлеченности - ' + str(index2)))):
         height = np.round(rect.get_height(),1)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
@@ -433,10 +439,10 @@ def comparison_bars():
     ax.set_ylabel('Оценка')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+    ax.legend(bbox_to_anchor=(1.05, 1), loc=0, borderaxespad=0)
     co_window = Tk()
     co_window.title("Cравнение")
-    co_window.geometry("1000x600")
+    co_window.geometry("1200x800")
     #co_window.wm_geometry("+%d+%d" % (x, y))
     canvas = FigureCanvasTkAgg(fig, master=co_window)
     plt.show()
@@ -486,7 +492,7 @@ def old_bars():
     ax.spines['right'].set_visible(False)
     old_window = Tk()
     old_window.title("Cравнение")
-    old_window.geometry("1000x600")
+    old_window.geometry("1200x800")
     #co_window.wm_geometry("+%d+%d" % (x, y))
     canvas = FigureCanvasTkAgg(fig, master=old_window)
     plt.show()
@@ -511,6 +517,10 @@ def on_closing_comparison_window():
     comparison_window.destroy()
     window.wm_state('normal')
 
+def on_closing_download_window():
+    download_window.destroy()
+    window.wm_state('normal')
+
 
 def comparison_screen():
     global cmp_window_is_open, comparison_window, first_butt, second_butt
@@ -531,7 +541,7 @@ def comparison_screen():
 
 
 def config_statistic_screen():
-    global by_company, by_departments, by_individual, back, comparison
+    global by_company, by_departments, by_individual, back, comparison, agesstat, download
 
     objects = [departments_button, statistic_button, quit_button]
     for object_name in objects:
@@ -607,10 +617,11 @@ def config_departments_screen():
 
 def config_main_screen():
     global statistic_button, departments_button, quit_button, add, delete, back, by_individual, by_departments, \
-        by_company, comparison
-    objects = [add, delete, back, by_individual, by_departments, by_company, comparison]
+        by_company, comparison, download, agesstat
+    objects = [add, delete, back, by_individual, by_departments, by_company, comparison, download, agesstat]
     for object_name in objects:
-        object_name.destroy()
+        if object_name is not None:
+            object_name.destroy()
     for i in range(len(departments)):
         try:
             departments_state[i].place(x=10000, y=10000)
@@ -640,6 +651,9 @@ departments_window = None
 comparison_window = None
 first_butt = None
 second_butt = None
+agesstat = None
+download = None
+download_window = None
 
 statistic_button = Button(window, text="Просмотреть статистику", command=config_statistic_screen)
 statistic_button.place(x=125, y=50)
