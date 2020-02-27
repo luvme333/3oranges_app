@@ -21,7 +21,7 @@ matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 from matplotlib.figure import Figure
 
-
+config_path = "log\\config.bin"
 class NavigationToolbar(NavigationToolbar2Tk):
     # only display the buttons we need
     toolitems = [t for t in NavigationToolbar2Tk.toolitems if
@@ -29,9 +29,56 @@ class NavigationToolbar(NavigationToolbar2Tk):
 
 
 
+def get_info(name):
+    info = None
+    with open(config_path, 'r', encoding='utf-8') as file:
+        lines = file.read().splitlines()
 
+    for i in range(len(lines)):
+        if name in lines[i]:
+            info = lines[i][len(name) + 1:len(lines[i])]
+    file.close()
+    return info
 
+server_ip = str(get_info("ip_adress"))
+address_to_server = (server_ip, 8686)
 
+def send_data(data):
+    global address_to_server
+    global clients
+    MAX_CONNECTIONS = 1
+    clients = []
+
+    clients = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(MAX_CONNECTIONS)]
+    for client in clients:
+        try:
+            client.connect(address_to_server)
+        except TimeoutError:
+            mb.showerror("Ошибка", "Ошибка подключения к серверу. Повторите позже или обратитесь к системному "
+                                   "администратору.")
+            window.quit()
+            return -1
+    data_to_send = pickle.dumps(data)
+
+    for i in range(MAX_CONNECTIONS):
+        clients[i].send(data_to_send)
+
+def get_data():
+    global address_to_server
+    global clients
+    MAX_CONNECTIONS = 1
+    clients = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(MAX_CONNECTIONS)]
+    send_data("get_data")
+    time.sleep(2)
+
+    for i in range(MAX_CONNECTIONS):
+        data = clients[i].recv(1000000)
+        data = pickle.loads(data)
+
+    return data
+
+all_df=get_data()
+all_df.to_csv('data.csv',encoding='utf-8')
 
 def graph_stat():
 
@@ -61,16 +108,16 @@ def graph_stat():
     index=np.round(np.mean(metrics),1)
     if graph_type == 0:
         title='Компания' +'\n' + 'Индекс вовлеченности ' + str(index)
-        description = ''
+        description = ' '
     elif graph_type == 1:
         title=combobox.get() + ', ' + (df['Department'][0]) +', ' + df['experience'][0] +'\n' + 'Индекс вовлеченности ' + str(index)
         description = df['Department'][0] +', ' + df['experience'][0]
     elif graph_type == 2:
         title=combobox.get() +'\n' + 'Индекс вовлеченности ' + str(index)
-        description = ''
+        description = ' '
     elif graph_type == 3:
         title='Стаж сотрудников - ' + combobox.get() +'\n' + 'Индекс вовлеченности ' + str(index)
-        description = ''
+        description = ' '
     else:
         description = 'gg'
     rates = ['Понимание своих задач \n и обеспеченность ресурсами', 'Нематериальное \n признание',
@@ -122,24 +169,6 @@ y = (window.winfo_screenheight() - sh) // 2
 window.wm_geometry("+%d+%d" % (x, y))
 
 
-def send_data(data):
-    global address_to_server
-    global clients
-    MAX_CONNECTIONS = 1
-
-    clients = [socket.socket(socket.AF_INET, socket.SOCK_STREAM) for i in range(MAX_CONNECTIONS)]
-    for client in clients:
-        try:
-            client.connect(address_to_server)
-        except TimeoutError:
-            mb.showerror("Ошибка", "Ошибка подключения к серверу. Повторите позже или обратитесь к системному "
-                                   "администратору.")
-            window.quit()
-            return -1
-    data_to_send = pickle.dumps(data)
-
-    for i in range(MAX_CONNECTIONS):
-        clients[i].send(data_to_send)
 
 
 def get_departments():
@@ -212,7 +241,7 @@ def delete_department():
                 file.write(line + '\n')
 
     data = ["hr", departments]
-    # send_data(data)
+    send_data(data)
 
     config_departments_screen()
 
@@ -227,7 +256,7 @@ def new_department():
     departments.append(department_to_add)
     departments_count = len(departments) - 1
     data = ["hr", departments]
-    # send_data(data)
+    send_data(data)
 
     file = open(path_to_departments, 'a', encoding='utf-8')
     file.write('\n' + department_to_add)
@@ -297,7 +326,7 @@ def save_departs_csv():
     filename = filedialog.asksaveasfilename(initialdir=" ", title="Введите название среза",
                                             filetypes=(
                                                 ("csv files", "*.csv"), ("csv files", "*.csv")))
-    df_to_save.to_csv(filename + '.csv')
+    df_to_save.to_csv(filename + '.csv', index=False)
 
 
 def by_individual_screen():
@@ -395,12 +424,12 @@ def search_filename(filename):
 
 def comparison_bars():
     try:
-        df1 = pd.read_csv(filename1)
+        df1 = pd.read_csv(filename1, index_col=0)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0
     try:
-        df2 = pd.read_csv(filename2)
+        df2 = pd.read_csv(filename2, index_col=0)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0
@@ -461,7 +490,7 @@ def comparison_bars():
 
 def old_bars():
     try:
-        df3 = pd.read_csv(filename3)
+        df3 = pd.read_csv(filename3, index_col=0)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0

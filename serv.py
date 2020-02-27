@@ -3,9 +3,23 @@ import socket
 import pickle
 import csv
 import pandas as pd
+import os
+config_path = "log\config.bin"
+def get_info(name):
+    info = None
+    with open(config_path, 'r', encoding='utf-8') as file:
+        lines = file.read().splitlines()
 
-SERVER_ADDRESS = ('192.168.1.50', 8686)
-MAX_CONNECTIONS = 10
+    for i in range(len(lines)):
+        if name in lines[i]:
+            info = lines[i][len(name) + 1:len(lines[i])]
+    file.close()
+    return info
+
+
+server_ip = str(get_info("ip_adress"))
+SERVER_ADDRESS = (server_ip, 8686)
+MAX_CONNECTIONS = 20
 INPUTS = list()
 OUTPUTS = list()
 path_to_departments = "log\\departments.txt"
@@ -23,7 +37,7 @@ def get_departments(path_departments):
             size = len(departments)
         else:
             i += 1
-    print(departments)
+
     return departments
 
 
@@ -33,13 +47,13 @@ def break_error():
 
 def send_departaments(res):
     departs = get_departments(path_to_departments)
-    print(departs)
+
     departments = pickle.dumps(departs)
     res.send(departments)
 
 
 def send_data(res):
-    df = pd.read_csv('data.csv', encoding='utf-8')
+    df = pd.read_csv('data.csv', encoding='utf-8', index_col=0)
     a = pickle.dumps(df)
     res.send(a)
 
@@ -53,6 +67,7 @@ def save_data(data_to_save):
 
 
 def save_departaments(departaments_to_save):
+
     all_dep = departaments_to_save[0]
     for depart in departaments_to_save[1:]:
         all_dep += '\n'
@@ -74,7 +89,7 @@ def what_to_do(data_from_connection, resr):
         if data_from_connection[0] == 'worker':
             save_data(data_from_connection[1:])
         elif data_from_connection[0] == 'hr':
-            save_departaments(data_from_connection[1:])
+            save_departaments(data_from_connection[1])
         else:
             break_error()
     else:
@@ -97,12 +112,12 @@ def handle_readables(readables, server):
             connection, client_address = resource.accept()
             connection.setblocking(0)
             INPUTS.append(connection)
-            print("new connection from {address}".format(address=client_address))
+
 
         else:
             data = ""
             try:
-                data = resource.recv(1024)
+                data = resource.recv(10000000)
 
             except ConnectionResetError:
                 pass
@@ -110,7 +125,7 @@ def handle_readables(readables, server):
             if data:
 
                 received_data = pickle.loads(data)
-                print(received_data)
+
                 what_to_do(received_data, resource)
 
                 if resource not in OUTPUTS:

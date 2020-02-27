@@ -12,7 +12,7 @@ import hashlib
 from uuid import getnode as get_mac
 import os.path
 
-config_path = "log/config.bin"
+config_path = "log\config.bin"
 
 
 class Scale(ttk.Scale):
@@ -38,7 +38,7 @@ def get_info(name):
 
 
 good_width = 500
-server_ip = str(get_info("server_ip"))
+server_ip = str(get_info("ip_adress"))
 address_to_server = (server_ip, 8686)
 clients = []
 
@@ -77,7 +77,7 @@ def get_departments():
     time.sleep(2)
 
     for i in range(MAX_CONNECTIONS):
-        data = clients[i].recv(4096)
+        data = clients[i].recv(8192)
         data = pickle.loads(data)
 
     return data
@@ -294,8 +294,7 @@ next_btn = Button(window, text="Следующий вопрос", command=next_q
 scale = Scale(window, orient=HORIZONTAL, length=300, from_=0, to=10)
 answer = Label(window, text="")
 
-# departments = get_departments()
-departments = ['1', '2', '3', '4']
+departments = get_departments()
 # первый экран
 name_request = Label(window, text='Введите Ваше имя и фамилию:')
 name_request.place(x=45, y=35)
@@ -306,6 +305,7 @@ start_btn.place(x=180, y=225)
 department_request = Label(window, text="Выберите Ваш отдел:")
 department_request.place(x=45, y=85)
 department_select = Combobox(window, width=47)
+
 department_select['values'] = departments
 department_select.current(0)
 department_select.place(x=45, y=110)
