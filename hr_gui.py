@@ -239,7 +239,7 @@ def delete_department():
         for line in departments:
             if line not in departments_to_delete:
                 file.write(line + '\n')
-
+    departments =list( set(departments) - set(departments_to_delete))
     data = ["hr", departments]
     send_data(data)
 

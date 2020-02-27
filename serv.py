@@ -4,7 +4,10 @@ import pickle
 import csv
 import pandas as pd
 import os
+
 config_path = "log\config.bin"
+
+
 def get_info(name):
     info = None
     with open(config_path, 'r', encoding='utf-8') as file:
@@ -22,7 +25,8 @@ SERVER_ADDRESS = (server_ip, 8686)
 MAX_CONNECTIONS = 20
 INPUTS = list()
 OUTPUTS = list()
-path_to_departments = "log\\departments.txt"
+global path_to_departments
+path_to_departments = "log/departments1.txt"
 
 
 def get_departments(path_departments):
@@ -59,7 +63,7 @@ def send_data(res):
 
 
 def save_data(data_to_save):
-    data_to_save = data_to_save[1:3]+data_to_save[4] + [data_to_save[0]]+[data_to_save[-1]]+[data_to_save[-3]]
+    data_to_save = data_to_save[1:3] + data_to_save[4] + [data_to_save[0]] + [data_to_save[-1]] + [data_to_save[-3]]
     with open('data.csv', "a", newline="", encoding='utf-8') as file:
         writer = csv.writer(file)
         writer.writerow(data_to_save)
@@ -67,18 +71,17 @@ def save_data(data_to_save):
 
 
 def save_departaments(departaments_to_save):
-
     all_dep = departaments_to_save[0]
     for depart in departaments_to_save[1:]:
         all_dep += '\n'
         all_dep += depart
-    file = open(path_to_departments, "w", encoding='utf-8')
-    file.write(all_dep)
-    file.close()
+    with open(path_to_departments, "w", encoding='utf-8') as file:
+        file.write(all_dep)
+        file.close()
 
 
 def what_to_do(data_from_connection, resr):
-    if type(data_from_connection) == str:      
+    if type(data_from_connection) == str:
         if data_from_connection == 'get_departments':
             send_departaments(resr)
         elif data_from_connection == 'get_data':
