@@ -628,6 +628,8 @@ def config_departments_screen():
                 departments_state[i].place(x=10, y=10 + i * 25)
     else:
         i_was_here = True
+        if len(departments) == 1 and depatments[0] == '':
+            return 0
         chk_states = [BooleanVar() for j in range(len(departments))]
         for department in departments:
             chk = Checkbutton(window, text=department, var=chk_states[i])
