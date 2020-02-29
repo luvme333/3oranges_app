@@ -304,14 +304,14 @@ start_btn = Button(window, text="Приступить к опросу", command=
 start_btn.place(x=180, y=225)
 department_request = Label(window, text="Выберите Ваш отдел:")
 department_request.place(x=45, y=85)
-department_select = Combobox(window, width=47)
+department_select = Combobox(window, width=47, state="readonly")
 
 department_select['values'] = departments
 department_select.current(0)
 department_select.place(x=45, y=110)
 experience_label = Label(window, text="Введите Ваш стаж работы:")
 experience_label.place(x=45, y=135)
-experience_age = Combobox(window, width=47)
+experience_age = Combobox(window, width=47, state="readonly")
 experience_age['values'] = age_list
 experience_age.current(0)
 experience_age.place(x=45, y=160)
@@ -323,8 +323,8 @@ anon_flag.place(x=45, y=185)
 quit_button = Button(window, text='Выход', command=window.quit)
 quit_button.place(x=100, y=225)
 
-key = get_info("key")
-result.append(key)
 
 if generate_key():
+    key = get_info("key")
+    result.append(key)
     window.mainloop()
