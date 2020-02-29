@@ -26,7 +26,7 @@ MAX_CONNECTIONS = 20
 INPUTS = list()
 OUTPUTS = list()
 global path_to_departments
-path_to_departments = "log/departments1.txt"
+path_to_departments = "log/departments.txt"
 
 
 def get_departments(path_departments):
@@ -71,6 +71,12 @@ def save_data(data_to_save):
 
 
 def save_departaments(departaments_to_save):
+    if departaments_to_save == []:
+        with open(path_to_departments, "w", encoding='utf-8') as file:
+        file.write('')
+        file.close()
+        return 1
+    
     all_dep = departaments_to_save[0]
     for depart in departaments_to_save[1:]:
         all_dep += '\n'
