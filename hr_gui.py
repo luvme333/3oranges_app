@@ -239,7 +239,7 @@ def delete_department():
         for line in departments:
             if line not in departments_to_delete:
                 file.write(line + '\n')
-    departments =list( set(departments) - set(departments_to_delete))
+    departments = get_departments()
     data = ["hr", departments]
     send_data(data)
 
@@ -628,7 +628,7 @@ def config_departments_screen():
                 departments_state[i].place(x=10, y=10 + i * 25)
     else:
         i_was_here = True
-        if len(departments) == 1 and depatments[0] == '':
+        if len(departments) == 1 and departments[0] == '':
             return 0
         chk_states = [BooleanVar() for j in range(len(departments))]
         for department in departments:
