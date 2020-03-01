@@ -177,6 +177,7 @@ def get_departments():
         departments = [row.strip() for row in file]
     i = 0
     size = len(departments)
+    
     while i < size:
         if departments[i] == '':
             departments.remove(departments[i])
@@ -233,13 +234,14 @@ def delete_department():
     for i in range(departments_count):
         if chk_states[i].get():
             departments_to_delete.append(departments[i])
-            departments_state[i].destroy()
-            count += 1
+        departments_state[i].destroy()
+        count += 1
     with open(path_to_departments, 'w', encoding='utf-8') as file:
         for line in departments:
             if line not in departments_to_delete:
                 file.write(line + '\n')
-    departments = get_departments()
+    get_departments()
+    print(departments)
     data = ["hr", departments]
     send_data(data)
 
@@ -596,8 +598,8 @@ i_was_here = False
 
 def config_departments_screen():
     global add, delete, back, departments_button, statistic_button, quit_button, departments_state, departments_count, \
-        chk_states, i_was_here
-
+        chk_states, i_was_here, departments
+    get_departments()
     objects = [add, delete, back, departments_button, statistic_button, quit_button]
     for object_name in objects:
         object_name.destroy()
@@ -607,7 +609,7 @@ def config_departments_screen():
         except IndexError:
             pass
 
-    get_departments()
+    
     w = weight_calculate()
     h = height_calculate()
     window.geometry('{}x{}'.format(w, h))
