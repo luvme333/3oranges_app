@@ -73,8 +73,8 @@ def save_data(data_to_save):
 def save_departaments(departaments_to_save):
     if departaments_to_save == []:
         with open(path_to_departments, "w", encoding='utf-8') as file:
-        file.write('')
-        file.close()
+            file.write('')
+            file.close()
         return 1
     
     all_dep = departaments_to_save[0]
