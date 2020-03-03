@@ -426,12 +426,12 @@ def search_filename(filename):
 
 def comparison_bars():
     try:
-        df1 = pd.read_csv(filename1, index_col=0)
+        df1 = pd.read_csv(filename1)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0
     try:
-        df2 = pd.read_csv(filename2, index_col=0)
+        df2 = pd.read_csv(filename2)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0
@@ -440,15 +440,15 @@ def comparison_bars():
              'Ценность работы \n в данной команде', 'Конструктивная обратная связь \n и перспективы развития']
     colors = ['#005DFF', '#FF0000', '#00C11A', '#D4DB00']
     colors1 = ['#D4DB00', '#00C11A', '#FF0000', '#005DFF']
-    fig = Figure(figsize=(10,4))
-    ax = fig.add_axes([0.1, 0.1, 0.8, 0.8])
+    fig = Figure(figsize=(12,4))
+    ax = fig.add_axes([0.1, 0.1, 0.69, 0.69])
     ax.set_ylim(0, 10)
     X = np.arange(4)
     width = 0.35
     index1=np.round(np.mean(df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]),1)
     index2 = np.round(np.mean(df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]), 1)
     for rect in (ax.bar(X - width / 2, df1[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=(search_filename(filename1)   +' ' + str(df1['discript'][0]) +'\n'+ 'Индекс вовлеченности - '+ str(index1)))):
+           label=(search_filename(filename1)   +' '+'\n'  + str(df1['discript'][0]) +'\n'+ 'Индекс вовлеченности - '+ str(index1)))):
         height = np.round(rect.get_height(),1)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
@@ -457,7 +457,7 @@ def comparison_bars():
                     ha='center', va='bottom')
 
     for rect in (ax.bar(X + width / 2, df2[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width,
-           label=(search_filename(filename2) + ' ' + str(df2['discript'][0]) +'\n' + 'Индекс вовлеченности - ' + str(index2)))):
+           label=(search_filename(filename2) + ' '+'\n'  + str(df2['discript'][0]) +'\n' + 'Индекс вовлеченности - ' + str(index2)))):
         height = np.round(rect.get_height(),1)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),
@@ -470,11 +470,11 @@ def comparison_bars():
     ax.set_ylabel('Оценка')
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
-    ax.legend(bbox_to_anchor=(1.05, 1), loc=0, borderaxespad=0)
+    ax.legend(bbox_to_anchor=(0.97, 0.97), loc=0, borderaxespad=0)
     co_window = Tk()
     co_window.title("Cравнение")
-    co_window.geometry("1200x800")
-    #co_window.wm_geometry("+%d+%d" % (x, y))
+    co_window.geometry("1280x720")
+    co_window.wm_geometry("+%d+%d" % (x, y))
     canvas = FigureCanvasTkAgg(fig, master=co_window)
     plt.show()
     canvas.draw()
@@ -492,7 +492,7 @@ def comparison_bars():
 
 def old_bars():
     try:
-        df3 = pd.read_csv(filename3, index_col=0)
+        df3 = pd.read_csv(filename3)
     except NameError:
         mb.showerror("Ошибка", message='Файлы для сравнения не были выбраны.')
         return 0
@@ -507,7 +507,7 @@ def old_bars():
     X = np.arange(4)
     width = 0.35
     index1=np.round(np.mean(df3[['st1', 'st2', 'st3', 'st4']].values.tolist()[0]),1)
-    for rect in (ax.bar(X - width / 2, df3[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width, color=colors)):
+    for rect in (ax.bar(X, df3[['st1', 'st2', 'st3', 'st4']].values.tolist()[0], width, color=colors)):
         height = np.round(rect.get_height(),1)
         ax.annotate('{}'.format(height),
                     xy=(rect.get_x() + rect.get_width() / 2, height),

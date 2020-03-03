@@ -22,7 +22,7 @@ def get_info(name):
 
 server_ip = str(get_info("ip_adress"))
 SERVER_ADDRESS = (server_ip, 8686)
-MAX_CONNECTIONS = 20
+MAX_CONNECTIONS =100
 INPUTS = list()
 OUTPUTS = list()
 global path_to_departments
@@ -68,7 +68,12 @@ def save_data(data_to_save):
         writer = csv.writer(file)
         writer.writerow(data_to_save)
         file.close()
-
+    df = pd.read_csv('data.csv', encoding='utf-8', index_col=0)
+    df.sort_values("timelaps", inplace=True)
+    df.drop_duplicates(subset="hash",
+                       keep='last', inplace=True)
+    df.reset_index(drop=True, inplace=True)
+    df.to_csv('data.csv')
 
 def save_departaments(departaments_to_save):
     if departaments_to_save == []:
